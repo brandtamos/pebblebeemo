@@ -1,0 +1,32 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "Okay Code",
+    "longName": "Beemo",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/beemo_screenshot.png",
+                "menuIcon": true,
+                "name": "BEEMO_MENU_IMAGE",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "Beemo",
+    "targetPlatforms": [
+        "aplite",
+        "basalt",
+        "chalk"
+    ],
+    "uuid": "1f2befb9-13d5-41b4-bd33-2fabe7a5f11f",
+    "versionLabel": "1.1",
+    "watchapp": {
+        "watchface": true
+    }
+}
