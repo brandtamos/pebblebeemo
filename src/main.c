@@ -23,6 +23,9 @@ static void update_time() {
 
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_buffer);
+  
+  //redraw graphic layer
+  layer_mark_dirty(s_canvas);
 }
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
@@ -40,15 +43,28 @@ static void draw_round_beemo(Layer *layer, GContext *ctx){
   int16_t width = bounds.size.w;
   int16_t midx = width / 2;
   
+  BatteryChargeState charge_state = battery_state_service_peek();
+  
   //draw face background
   graphics_context_set_fill_color(ctx, GColorPastelYellow); 
   graphics_fill_rect(ctx, GRect(30, 30, 122, 70), 8, GCornersAll);
+
   
   //draw eyes and mouth
   graphics_context_set_fill_color(ctx, GColorBlack); 
-  graphics_fill_circle(ctx, GPoint(midx - 50,50), 7);
-  graphics_fill_circle(ctx, GPoint(midx + 50,50), 7);
-  graphics_fill_radial(ctx, GRect(71, 35, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(90), DEG_TO_TRIGANGLE(270));
+  graphics_fill_circle(ctx, GPoint(midx - 50,50), 6);
+  graphics_fill_circle(ctx, GPoint(midx + 50,50), 6);
+  
+  if(charge_state.charge_percent > 50){
+    graphics_fill_radial(ctx, GRect(71, 35, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(90), DEG_TO_TRIGANGLE(270));
+  }
+  else if(charge_state.charge_percent > 25){
+    graphics_fill_rect(ctx, GRect(71, 65, 40, 6), 0, GCornersAll);
+  }
+  else{
+    graphics_fill_radial(ctx, GRect(71, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(270), DEG_TO_TRIGANGLE(359));
+    graphics_fill_radial(ctx, GRect(71, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(90));
+  }
   
   //draw slot
   graphics_context_set_fill_color(ctx, GColorDarkGreen);
@@ -81,6 +97,7 @@ static void draw_square_beemo(Layer *layer, GContext *ctx){
   GRect bounds = layer_get_bounds(layer);
   int16_t width = bounds.size.w;
   int16_t midx = width / 2;
+  BatteryChargeState charge_state = battery_state_service_peek();
   
   //draw face background
   graphics_context_set_fill_color(ctx, GColorPastelYellow); 
@@ -90,7 +107,17 @@ static void draw_square_beemo(Layer *layer, GContext *ctx){
   graphics_context_set_fill_color(ctx, GColorBlack); 
   graphics_fill_circle(ctx, GPoint(midx - 45,50), 7);
   graphics_fill_circle(ctx, GPoint(midx + 45,50), 7);
-  graphics_fill_radial(ctx, GRect(54, 35, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(90), DEG_TO_TRIGANGLE(270));
+  
+  if(charge_state.charge_percent > 50){
+    graphics_fill_radial(ctx, GRect(54, 35, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(90), DEG_TO_TRIGANGLE(270));
+  }
+  else if(charge_state.charge_percent > 25){
+    graphics_fill_rect(ctx, GRect(54, 65, 40, 6), 0, GCornersAll);
+  }
+  else{
+    graphics_fill_radial(ctx, GRect(54, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(270), DEG_TO_TRIGANGLE(359));
+    graphics_fill_radial(ctx, GRect(54, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(90));
+  }
   
   //draw slot
   graphics_context_set_fill_color(ctx, GColorDarkGreen);
