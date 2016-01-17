@@ -36,13 +36,15 @@ static void draw_bw_outlines(Layer *layer, GContext *ctx){
   graphics_fill_rect(ctx, GRect(20, 140, 10, 30), 2, GCornersAll);
   graphics_fill_rect(ctx, GRect(10, 150, 30, 10), 2, GCornersAll);
 }
-
+static void bt_handler(bool connected) {
+  layer_mark_dirty(s_canvas);
+}
 static void draw_round_beemo(Layer *layer, GContext *ctx){
   //FYI, GRects are like this: (x of top left corner, y of top left corner, width, height)
   GRect bounds = layer_get_bounds(layer);
   int16_t width = bounds.size.w;
   int16_t midx = width / 2;
-  
+  bool btConnected = connection_service_peek_pebble_app_connection();
   BatteryChargeState charge_state = battery_state_service_peek();
   
   //draw face background
@@ -50,11 +52,20 @@ static void draw_round_beemo(Layer *layer, GContext *ctx){
   graphics_fill_rect(ctx, GRect(30, 30, 122, 70), 8, GCornersAll);
 
   
-  //draw eyes and mouth
+  //draw eyes
+  //if BT is connected, eyes open, otherwise eyes closed
   graphics_context_set_fill_color(ctx, GColorBlack); 
-  graphics_fill_circle(ctx, GPoint(midx - 50,50), 6);
-  graphics_fill_circle(ctx, GPoint(midx + 50,50), 6);
   
+  if(btConnected){
+    graphics_fill_circle(ctx, GPoint(midx - 50,50), 6);
+    graphics_fill_circle(ctx, GPoint(midx + 50,50), 6);
+  }
+  else{
+    graphics_fill_rect(ctx, GRect(midx - 50, 50, 15, 5), 0, GCornersAll);
+    graphics_fill_rect(ctx, GRect(midx + 35, 50, 15, 5), 0, GCornersAll);
+  }
+  
+  //draw mouth, smile, straight, or frown depending on battery state
   if(charge_state.charge_percent > 50){
     graphics_fill_radial(ctx, GRect(71, 35, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(90), DEG_TO_TRIGANGLE(270));
   }
@@ -62,8 +73,7 @@ static void draw_round_beemo(Layer *layer, GContext *ctx){
     graphics_fill_rect(ctx, GRect(71, 65, 40, 6), 0, GCornersAll);
   }
   else{
-    graphics_fill_radial(ctx, GRect(71, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(270), DEG_TO_TRIGANGLE(359));
-    graphics_fill_radial(ctx, GRect(71, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(90));
+    graphics_fill_radial(ctx, GRect(71, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(270), DEG_TO_TRIGANGLE(450));
   }
   
   //draw slot
@@ -98,6 +108,7 @@ static void draw_square_beemo(Layer *layer, GContext *ctx){
   int16_t width = bounds.size.w;
   int16_t midx = width / 2;
   BatteryChargeState charge_state = battery_state_service_peek();
+  bool btConnected = connection_service_peek_pebble_app_connection();
   
   //draw face background
   graphics_context_set_fill_color(ctx, GColorPastelYellow); 
@@ -105,9 +116,19 @@ static void draw_square_beemo(Layer *layer, GContext *ctx){
   
   //draw eyes and mouth
   graphics_context_set_fill_color(ctx, GColorBlack); 
-  graphics_fill_circle(ctx, GPoint(midx - 45,50), 7);
-  graphics_fill_circle(ctx, GPoint(midx + 45,50), 7);
   
+  //draw eyes
+  //if BT is connected, eyes open, otherwise eyes closed
+  if(btConnected){
+    graphics_fill_circle(ctx, GPoint(midx - 45,50), 7);
+    graphics_fill_circle(ctx, GPoint(midx + 45,50), 7);
+  }
+  else{
+    graphics_fill_rect(ctx, GRect(midx - 45, 50, 15, 5), 0, GCornersAll);
+    graphics_fill_rect(ctx, GRect(midx + 33, 50, 15, 5), 0, GCornersAll);
+  }
+  
+  //draw mouth, smile, straight, or frown depending on battery state
   if(charge_state.charge_percent > 50){
     graphics_fill_radial(ctx, GRect(54, 35, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(90), DEG_TO_TRIGANGLE(270));
   }
@@ -115,8 +136,7 @@ static void draw_square_beemo(Layer *layer, GContext *ctx){
     graphics_fill_rect(ctx, GRect(54, 65, 40, 6), 0, GCornersAll);
   }
   else{
-    graphics_fill_radial(ctx, GRect(54, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(270), DEG_TO_TRIGANGLE(359));
-    graphics_fill_radial(ctx, GRect(54, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(90));
+    graphics_fill_radial(ctx, GRect(54, 55, 40, 40), GOvalScaleModeFitCircle, 5, DEG_TO_TRIGANGLE(270), DEG_TO_TRIGANGLE(450));
   }
   
   //draw slot
@@ -129,8 +149,8 @@ static void draw_square_beemo(Layer *layer, GContext *ctx){
   
   //draw yellow d-pad
   graphics_context_set_fill_color(ctx, GColorYellow);
-  graphics_fill_rect(ctx, GRect(20, 140, 10, 30), 2, GCornersAll);
-  graphics_fill_rect(ctx, GRect(10, 150, 30, 10), 2, GCornersAll);
+  graphics_fill_rect(ctx, GRect(15, 136, 10, 30), 2, GCornersAll);
+  graphics_fill_rect(ctx, GRect(5, 146, 30, 10), 2, GCornersAll);
   
   //draw red circle
   graphics_context_set_fill_color(ctx, GColorRed); 
@@ -152,6 +172,7 @@ static void draw_square_beemo(Layer *layer, GContext *ctx){
 static void layer_update_proc(Layer *layer, GContext *ctx) {
   PBL_IF_ROUND_ELSE(draw_round_beemo(layer, ctx), draw_square_beemo(layer, ctx));
 }
+
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
@@ -202,11 +223,18 @@ static void init() {
   window_set_background_color(s_main_window, GColorCyan);
   window_stack_push(s_main_window, true);
   
+  bt_handler(connection_service_peek_pebble_app_connection());
+  //subscribe to bluetooth events
+  connection_service_subscribe((ConnectionHandlers) {
+    .pebble_app_connection_handler = bt_handler
+  });
   // Make sure the time is displayed from the start
   update_time();
 }
 
 static void deinit() {
+  //unsubscribe from bt events
+  connection_service_unsubscribe();
   // Destroy Window
   window_destroy(s_main_window);
 }
